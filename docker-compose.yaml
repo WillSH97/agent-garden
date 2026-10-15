@@ -1,0 +1,88 @@
+# volumes:
+#   # weaviate_data:
+
+services:
+  # Redis DB for sandbox Celery job queue
+  redis-celery:
+    image: redis
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--port", "6379" ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # postgres for fuckin, the messageboard I guess lmao
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  # db vis
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_gui
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+          
+### own images:
+  fastapi-dummy:
+    depends_on: 
+      redis-celery:
+        condition: service_healthy
+    build:
+      context: ./fastapi-dummy
+      dockerfile: ./Dockerfile
+      platforms:
+        - linux/amd64
+    environment:
+      - REDIS_BROKER=${REDIS_BROKER}
+      - REDIS_BACKEND=${REDIS_BACKEND}
+    ports:
+      - "8000:8000"
+    command: uvicorn fastapi_dummy:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 600
+
+  celery-rag-worker:
+    depends_on: 
+      redis-celery:
+        condition: service_healthy
+    build:
+      context: ./celery-RAG-worker
+      dockerfile: ./Dockerfile
+      platforms:
+        - linux/amd64
+    environment:
+      - REDIS_BROKER=${REDIS_BROKER}
+      - REDIS_BACKEND=${REDIS_BACKEND}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+    command: celery -A celeryapp worker -l INFO
+
+  streamlit-msgboard:
+    build:
+      context: ./streamlit-msgboard
+      dockerfile: ./Dockerfile
+      platforms:
+        - linux/amd64
+    ports:
+      - "8501:8501"
+    command: streamlit run streamlit_msgboard.py
+
+
+volumes:
+  postgres_data:
