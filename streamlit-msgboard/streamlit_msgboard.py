@@ -16,8 +16,8 @@ def return_messages():
     check the postgres and return all, formatted as message history
     '''
     conn = psycopg2.connect(    
-        host="test",                     # Matches the docker-compose service name
-        database="mydb",
+        host="db",                     # Matches the docker-compose service name
+        database="test",
         user="myuser",
         password="mypassword",
         port="5432"
@@ -31,7 +31,7 @@ SELECT name, message from msgboard
     for result in results.fetchall():
         return_list.append(
             {
-                "name": result[0]
+                "name": result[0],
                 "message": result[1]
             }
         )
@@ -59,7 +59,7 @@ def check_updates():
         st.session_state['messages'] = cand_msgs
         st.session_state['timer'] = 0 #set timer back to 0
         st.rerun()
-    else if st.session_state['timer'] => 90: #only rerun every 90 seconds of inactivity
+    elif st.session_state['timer'] >= 90: #only rerun every 90 seconds of inactivity
         celery_app.send_task("tasks.main_run", args=[])
         st.session_state['timer'] = 0
     else:

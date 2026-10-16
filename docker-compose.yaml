@@ -91,7 +91,7 @@ services:
       platforms:
         - linux/amd64
     ports:
-      - "8501:8502"
+      - "8502:8501"
     command: streamlit run streamlit_makefriend.py
 
 

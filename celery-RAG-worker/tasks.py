@@ -50,31 +50,6 @@ def intro(likes, dislikes, personality, name):
     ]
     outputs = model.generate(messages = temp_message_hist)
     return outputs.content
-
-def pgaddmsg(sqlquery: str):
-    '''
-    postgres support func for querying
-    '''
-    conn = psycopg2.connect(    
-        host="test",                     # Matches the docker-compose service name
-        database="mydb",
-        user="myuser",
-        password="mypassword",
-        port="5432"
-    )
-    cur = conn.cursor()
-    create_table_query ='''
-CREATE TABLE IF NOT EXISTS msgboard (
-    name VARCHAR PRIMARY KEY NOT NULL,
-    message VARCHAR NOT NULL
-)
-'''
-    cur.execute(create_table_query)
-    
-    records = cur.fetchall()
-    cur.close()
-    con.close()
-    return records
     
 
 
@@ -90,8 +65,8 @@ def send_to_msgboard(name: str, message: str) -> None:
         message: message to post to the messageboard.
     '''
     conn = psycopg2.connect(    
-        host="test",                     # Matches the docker-compose service name
-        database="mydb",
+        host="db",                     # Matches the docker-compose service name
+        database="test",
         user="myuser",
         password="mypassword",
         port="5432"
@@ -125,8 +100,8 @@ def retrieve_msgboard() -> str:
     Returns the entire message history of the messageboard of friends.
     '''
     conn = psycopg2.connect(    
-        host="test",                     # Matches the docker-compose service name
-        database="mydb",
+        host="db",                     # Matches the docker-compose service name
+        database="test",
         user="myuser",
         password="mypassword",
         port="5432"
@@ -154,7 +129,7 @@ def create_friend(likes, dislikes, personality, name): #TODO: add profile img st
     '''
     agent = CodeAgent(
         model = model,
-        tools = [send_to_msgboard(), retrieve_msgboard()]
+        tools = [send_to_msgboard(), retrieve_msgboard()],
         instructions = format_personality(likes, dislikes, personality, name)
     )
     # add to friends dict

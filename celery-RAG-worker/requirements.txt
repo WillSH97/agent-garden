@@ -49,5 +49,5 @@ vine==5.1.0
 wcwidth==0.8.3
 weaviate-agents==1.8.0
 weaviate-client==4.23.0
-smolagents
-psycopg2
+smolagents[litellm]
+psycopg2-binary
