@@ -1,4 +1,10 @@
 import streamlit as st
+import requests
+import json
+
+import os
+
+FASTAPI_URL = os.environ.get("FASTAPI_URL", "localhost:8000")
 
 with st.form("make a friend!"):
     name = st.text_input("Enter your friend's name")
@@ -13,4 +19,11 @@ with st.form("make a friend!"):
             st.warning("fill out all traits!")
         else:
             #TODO: add function here that submits to make friend
+            payload = {
+                "likes": likes,
+                "dislikes": dislikes, 
+                "personality": personality,
+                "name": name
+            }
+            requests.post(url = FASTAPI_URL+"/makefriend", json = payload)
             st.success("you've made a friend!")

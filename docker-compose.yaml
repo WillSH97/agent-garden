@@ -22,7 +22,7 @@ services:
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: test
     ports:
       - "5432:5432"
     volumes:
@@ -82,6 +82,17 @@ services:
     ports:
       - "8501:8501"
     command: streamlit run streamlit_msgboard.py
+
+#TEMP - for testing
+  streamlit-makefriend:
+    build:
+      context: ./streamlit-makefriend
+      dockerfile: ./Dockerfile
+      platforms:
+        - linux/amd64
+    ports:
+      - "8501:8502"
+    command: streamlit run streamlit_makefriend.py
 
 
 volumes:

@@ -13,8 +13,8 @@ add celery_app.py eventually, when this is functioning, and work out how to wrap
 import os
 import copy
 import json
-import weaviate
 from smolagents import CodeAgent, LiteLLMModel, tool
+import psycopg2
 
 #import our own celery stuff
 from celeryapp import app
@@ -51,6 +51,32 @@ def intro(likes, dislikes, personality, name):
     outputs = model.generate(messages = temp_message_hist)
     return outputs.content
 
+def pgaddmsg(sqlquery: str):
+    '''
+    postgres support func for querying
+    '''
+    conn = psycopg2.connect(    
+        host="test",                     # Matches the docker-compose service name
+        database="mydb",
+        user="myuser",
+        password="mypassword",
+        port="5432"
+    )
+    cur = conn.cursor()
+    create_table_query ='''
+CREATE TABLE IF NOT EXISTS msgboard (
+    name VARCHAR PRIMARY KEY NOT NULL,
+    message VARCHAR NOT NULL
+)
+'''
+    cur.execute(create_table_query)
+    
+    records = cur.fetchall()
+    cur.close()
+    con.close()
+    return records
+    
+
 
 
 ### SUPPORT FUNCTIONS FOR AGENTS
@@ -63,14 +89,61 @@ def send_to_msgboard(name: str, message: str) -> None:
         name: your name.
         message: message to post to the messageboard.
     '''
-    ## INSERT ROW INTO POSTGRES - NEEDS TO BE DECORATED TO BE ADDED AS A TOOL, DESCRIPTIVE, ETC
+    conn = psycopg2.connect(    
+        host="test",                     # Matches the docker-compose service name
+        database="mydb",
+        user="myuser",
+        password="mypassword",
+        port="5432"
+    )
+    cur = conn.cursor()
+    create_table_query ='''
+CREATE TABLE IF NOT EXISTS msgboard (
+id SERIAL PRIMARY KEY
+name VARCHAR PRIMARY KEY NOT NULL,
+message VARCHAR NOT NULL
+)
+'''
+    cur.execute(create_table_query) #FIGURE OUT AT WHICH POINT THIS SHOULD RUN REALISTICALLY
+
+
+    insert_query = """
+INSERT INTO msgboard (name, message) 
+VALUES (%s, %s);
+    """
+    msg_data = (name, message)
+    cur.execute(insert_query, msg_data)
+    conn.commit()
+    # records = cur.fetchall()
+    cur.close()
+    con.close()
+    # return records
 
 @tool
-def retrieve_msgboard() -> None:
+def retrieve_msgboard() -> str:
     '''
-    Returns the entire message history
+    Returns the entire message history of the messageboard of friends.
     '''
-
+    conn = psycopg2.connect(    
+        host="test",                     # Matches the docker-compose service name
+        database="mydb",
+        user="myuser",
+        password="mypassword",
+        port="5432"
+    )
+    cur = conn.cursor()
+    return_msgboard_query ='''
+SELECT * from msgboard
+'''
+    results = cur.execute(return_msgboard_query)
+    return_str = ''
+    for result in results.fetchall():
+        return_str += ' '.join(result)
+    # conn.commit()
+    # records = cur.fetchall()
+    cur.close()
+    con.close()
+    return return_str
 
 
 # main tasks for celery
@@ -89,6 +162,7 @@ def create_friend(likes, dislikes, personality, name): #TODO: add profile img st
         "name": name,
         "agent": agent              
     }
+    
     send_to_msgboard(name, intro(likes, dislikes, personality, name))
 
 

@@ -50,3 +50,4 @@ wcwidth==0.8.3
 weaviate-agents==1.8.0
 weaviate-client==4.23.0
 smolagents
+psycopg2

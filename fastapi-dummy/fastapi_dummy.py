@@ -31,9 +31,6 @@ def RAGchat(friend_stats: MakeFriend):
 # Send task by name
     celery_app.send_task('tasks.create_friend', args=[friend_stats.likes, friend_stats.dislikes, friend_stats.personality, friend_stats.name,])
     # TODO: add robustness by returning descriptive stuff in case there's issues here
-    # # Wait for and retrieve the return value (blocking)
-    # output = result.get(timeout = 180) #3 min timeout for response
-    # return output
 
 
 if __name__ == "__main__":
