@@ -74,8 +74,8 @@ def send_to_msgboard(name: str, message: str) -> None:
     cur = conn.cursor()
     create_table_query ='''
 CREATE TABLE IF NOT EXISTS msgboard (
-id SERIAL PRIMARY KEY
-name VARCHAR PRIMARY KEY NOT NULL,
+id SERIAL PRIMARY KEY,
+name VARCHAR NOT NULL,
 message VARCHAR NOT NULL
 )
 '''
@@ -91,7 +91,7 @@ VALUES (%s, %s);
     conn.commit()
     # records = cur.fetchall()
     cur.close()
-    con.close()
+    conn.close()
     # return records
 
 @tool
@@ -117,7 +117,7 @@ SELECT * from msgboard
     # conn.commit()
     # records = cur.fetchall()
     cur.close()
-    con.close()
+    conn.close()
     return return_str
 
 
