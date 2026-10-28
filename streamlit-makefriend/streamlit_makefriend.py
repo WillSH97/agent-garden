@@ -4,7 +4,7 @@ import json
 
 import os
 
-FASTAPI_URL = os.environ.get("FASTAPI_URL", "localhost:8000")
+FASTAPI_URL = os.environ.get("FASTAPI_URL", "http://localhost:8000")
 
 with st.form("make a friend!"):
     name = st.text_input("Enter your friend's name")

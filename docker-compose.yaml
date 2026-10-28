@@ -90,6 +90,8 @@ services:
       dockerfile: ./Dockerfile
       platforms:
         - linux/amd64
+    environment:
+      - FASTAPI_URL=${FASTAPI_URL}
     ports:
       - "8502:8501"
     command: streamlit run streamlit_makefriend.py

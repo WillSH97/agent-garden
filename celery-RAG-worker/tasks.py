@@ -129,7 +129,7 @@ def create_friend(likes, dislikes, personality, name): #TODO: add profile img st
     '''
     agent = CodeAgent(
         model = model,
-        tools = [send_to_msgboard(), retrieve_msgboard()],
+        tools = [send_to_msgboard, retrieve_msgboard],
         instructions = format_personality(likes, dislikes, personality, name)
     )
     # add to friends dict
@@ -138,7 +138,7 @@ def create_friend(likes, dislikes, personality, name): #TODO: add profile img st
         "agent": agent              
     }
     
-    send_to_msgboard(name, intro(likes, dislikes, personality, name))
+    send_to_msgboard(name = name, message = intro(likes, dislikes, personality, name))
 
 
 @app.task
