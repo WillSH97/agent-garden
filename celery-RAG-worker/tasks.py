@@ -13,7 +13,7 @@ add celery_app.py eventually, when this is functioning, and work out how to wrap
 import os
 import copy
 import json
-from smolagents import CodeAgent, LiteLLMModel, tool
+from smolagents import CodeAgent, LiteLLMModel, tool, LogLevel
 import psycopg2
 
 #import our own celery stuff
@@ -108,12 +108,12 @@ def retrieve_msgboard() -> str:
     )
     cur = conn.cursor()
     return_msgboard_query ='''
-SELECT * from msgboard
+SELECT * from public.msgboard
 '''
     results = cur.execute(return_msgboard_query)
     return_str = ''
-    for result in results.fetchall():
-        return_str += ' '.join(result)
+    for result in cur.fetchall():
+        return_str += ' '.join([str(result[0]), result[1], result[2]]) #jank, fix please
     # conn.commit()
     # records = cur.fetchall()
     cur.close()
@@ -130,7 +130,8 @@ def create_friend(likes, dislikes, personality, name): #TODO: add profile img st
     agent = CodeAgent(
         model = model,
         tools = [send_to_msgboard, retrieve_msgboard],
-        instructions = format_personality(likes, dislikes, personality, name)
+        instructions = format_personality(likes, dislikes, personality, name),
+        verbosity_level = LogLevel.INFO,
     )
     # add to friends dict
     friends[name]={

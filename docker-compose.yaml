@@ -79,6 +79,9 @@ services:
       dockerfile: ./Dockerfile
       platforms:
         - linux/amd64
+    environment:
+      - REDIS_BROKER=${REDIS_BROKER}
+      - REDIS_BACKEND=${REDIS_BACKEND}
     ports:
       - "8501:8501"
     command: streamlit run streamlit_msgboard.py

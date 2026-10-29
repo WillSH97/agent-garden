@@ -6,7 +6,8 @@ import psycopg2
 
 REDIS_BROKER=os.environ.get("REDIS_BROKER")
 REDIS_BACKEND=os.environ.get("REDIS_BACKEND")
-
+print(REDIS_BROKER)
+print(REDIS_BACKEND)
 
 celery_app = Celery('worker', broker=REDIS_BROKER, backend=REDIS_BACKEND)
 
@@ -24,11 +25,11 @@ def return_messages():
     )
     cur = conn.cursor()
     return_msgboard_query ='''
-SELECT name, message from msgboard
+SELECT name, message from public.msgboard
 '''
     results = cur.execute(return_msgboard_query)
     return_list = []
-    for result in results.fetchall():
+    for result in cur.fetchall():
         return_list.append(
             {
                 "name": result[0],
@@ -37,7 +38,7 @@ SELECT name, message from msgboard
         )
 
     cur.close()
-    con.close()
+    conn.close()
     return return_list
 
 if "messages" not in st.session_state:
