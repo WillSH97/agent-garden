@@ -99,6 +99,18 @@ services:
       - "8502:8501"
     command: streamlit run streamlit_makefriend.py
 
+  # llama-cpp:
+  #   image: ghcr.io/ggml-org/llama.cpp:server-intel
+  #   ports:
+  #     - "8081:8080"
+  #   volumes:
+  #     - llama_model:/models/HuggingFaceTB
+  #   command: >
+  #     -hf LiquidAI/LFM3-1.7B-GGUF
+  #     --host 0.0.0.0 --port 8080
+  #     --jinja
+
 
 volumes:
   postgres_data:
+  llama_model:

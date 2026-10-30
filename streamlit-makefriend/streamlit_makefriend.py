@@ -27,3 +27,4 @@ with st.form("make a friend!"):
             }
             requests.post(url = FASTAPI_URL+"/makefriend", json = payload)
             st.success("you've made a friend!")
+            st.rerun()

@@ -25,7 +25,7 @@ def return_messages():
     )
     cur = conn.cursor()
     return_msgboard_query ='''
-SELECT name, message from public.msgboard
+SELECT name, message, personality from public.msgboard
 '''
     results = cur.execute(return_msgboard_query)
     return_list = []
@@ -33,13 +33,36 @@ SELECT name, message from public.msgboard
         return_list.append(
             {
                 "name": result[0],
-                "message": result[1]
+                "message": result[1],
+                "personality": result[2]
             }
         )
 
     cur.close()
     conn.close()
     return return_list
+
+def clear_message_hist():
+    '''
+    clears all messages
+    '''
+    conn = psycopg2.connect(    
+        host="db",                     # Matches the docker-compose service name
+        database="test",
+        user="myuser",
+        password="mypassword",
+        port="5432"
+    )
+    cur = conn.cursor()
+    return_msgboard_query ='''
+delete from public.msgboard
+'''
+    cur.execute(return_msgboard_query)
+    cur.commit()
+    cur.close()
+    conn.close()
+
+
 
 if "messages" not in st.session_state:
     st.session_state['messages'] = []
@@ -49,7 +72,17 @@ if "timer" not in st.session_state:
 
 for message in st.session_state['messages']:
     with st.chat_message(message["name"], ): #using the name par for the username, add avatar here
+        st.title(f':small[{message["name"]}]', help=message["personality"])
         st.markdown(message["message"])
+
+with st.sidebar:
+    if st.button("delete chat history"):
+        clear_message_hist()
+        cand_msgs = return_messages()
+        st.session_state['messages'] = cand_msgs
+        st.rerun()
+
+
 
 #shitty daemon process:
 @st.fragment(run_every=5.0)

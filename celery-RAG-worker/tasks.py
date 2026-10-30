@@ -28,6 +28,12 @@ model = LiteLLMModel(
     api_key=API_KEY,
 )
 
+# model = LiteLLMModel(
+#     model_id="openai/lfm3-1.7b",  # Or another Groq-supported model ID
+#     api_base="http://localhost:8081/v1",
+#     api_key="none"
+# )
+
 #support vars
 friends = {}
 
@@ -50,7 +56,21 @@ def intro(likes, dislikes, personality, name):
     ]
     outputs = model.generate(messages = temp_message_hist)
     return outputs.content
+
+def format_chat_hist(pg_chat_hist):
+    return_str = 'WHOLE MESSAGE HISTORY - '
+    for result in pg_chat_hist:
+        return_str += f"[message no.: {result[0]}, message sender name: {result[1]}, message: {result[2]}], "
+    return return_str
+
+def basic_intro(likes, dislikes, personality, name):
+    raw_intro = f'''name: {name}
+    likes: {likes}
+    dislikes: {dislikes}
+    personality: {personality}'''
+    return raw_intro
     
+        
 
 
 
@@ -76,17 +96,19 @@ def send_to_msgboard(name: str, message: str) -> None:
 CREATE TABLE IF NOT EXISTS msgboard (
 id SERIAL PRIMARY KEY,
 name VARCHAR NOT NULL,
-message VARCHAR NOT NULL
+message VARCHAR NOT NULL,
+personality VARCHAR NOT NULL
 )
 '''
+# image VARCHAR NOT NULL
     cur.execute(create_table_query) #FIGURE OUT AT WHICH POINT THIS SHOULD RUN REALISTICALLY
 
 
     insert_query = """
-INSERT INTO msgboard (name, message) 
-VALUES (%s, %s);
+INSERT INTO msgboard (name, message, personality) 
+VALUES (%s, %s, %s);
     """
-    msg_data = (name, message)
+    msg_data = (name, message, friends[name]["personality"], ) # friends[name]["img"]
     cur.execute(insert_query, msg_data)
     conn.commit()
     # records = cur.fetchall()
@@ -108,14 +130,10 @@ def retrieve_msgboard() -> str:
     )
     cur = conn.cursor()
     return_msgboard_query ='''
-SELECT * from public.msgboard
+SELECT id, name, message from public.msgboard
 '''
     results = cur.execute(return_msgboard_query)
-    return_str = ''
-    for result in cur.fetchall():
-        return_str += ' '.join([str(result[0]), result[1], result[2]]) #jank, fix please
-    # conn.commit()
-    # records = cur.fetchall()
+    return_str = format_chat_hist(cur.fetchall())
     cur.close()
     conn.close()
     return return_str
@@ -136,7 +154,9 @@ def create_friend(likes, dislikes, personality, name): #TODO: add profile img st
     # add to friends dict
     friends[name]={
         "name": name,
-        "agent": agent              
+        "agent": agent,
+        "personality": basic_intro(likes, dislikes, personality, name),
+        # "img": img
     }
     
     send_to_msgboard(name = name, message = intro(likes, dislikes, personality, name))
