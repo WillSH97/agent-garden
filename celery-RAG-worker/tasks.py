@@ -30,7 +30,7 @@ model = LiteLLMModel(
 
 # model = LiteLLMModel(
 #     model_id="openai/lfm3-1.7b",  # Or another Groq-supported model ID
-#     api_base="http://localhost:8081/v1",
+#     api_base="http://llama-cpp:8081/v1",
 #     api_key="none"
 # )
 

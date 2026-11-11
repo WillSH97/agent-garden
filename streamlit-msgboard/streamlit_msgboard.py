@@ -58,7 +58,7 @@ def clear_message_hist():
 delete from public.msgboard
 '''
     cur.execute(return_msgboard_query)
-    cur.commit()
+    conn.commit()
     cur.close()
     conn.close()
 
