@@ -87,17 +87,29 @@ services:
     command: streamlit run streamlit_msgboard.py
 
 #TEMP - for testing
-  streamlit-makefriend:
-    build:
-      context: ./streamlit-makefriend
-      dockerfile: ./Dockerfile
-      platforms:
-        - linux/amd64
-    environment:
-      - FASTAPI_URL=${FASTAPI_URL}
-    ports:
-      - "8502:8501"
-    command: streamlit run streamlit_makefriend.py
+  # streamlit-makefriend:
+  #   build:
+  #     context: ./streamlit-makefriend
+  #     dockerfile: ./Dockerfile
+  #     platforms:
+  #       - linux/amd64
+  #   environment:
+  #     - FASTAPI_URL=${FASTAPI_URL}
+  #   ports:
+  #     - "8502:8501"
+  #   command: streamlit run streamlit_makefriend.py
+
+  # gradio-makefriend:
+  #   build:
+  #     context: ./gradio-makefriend
+  #     dockerfile: ./Dockerfile
+  #     platforms:
+  #       - linux/amd64
+  #   environment:
+  #     - FASTAPI_URL=${FASTAPI_URL}
+  #   ports:
+  #     - "7860:7860"
+  #   command: python3 gradio-makefriend.py
 
   # llama-cpp:
   #   image: ghcr.io/ggml-org/llama.cpp:server # this one runs on cpu
